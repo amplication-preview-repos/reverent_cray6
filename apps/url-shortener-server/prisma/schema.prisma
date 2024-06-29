@@ -1,0 +1,45 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model AccessLog {
+  browserName    String?
+  browserVersion String?
+  createdAt      DateTime  @default(now())
+  id             String    @id @default(cuid())
+  link           Link?     @relation(name: "AccessLogsOnLink", fields: [linkId], references: [id])
+  linkId         String?
+  links          Link[]    @relation(name: "AccessLogOnLinks")
+  osName         String?
+  osVersion      String?
+  timestamp      DateTime?
+  updatedAt      DateTime  @updatedAt
+}
+
+model Metric {
+  createdAt     DateTime  @default(now())
+  id            String    @id @default(cuid())
+  link          Link?     @relation(fields: [linkId], references: [id])
+  linkId        String?
+  timestamp     DateTime?
+  totalAccesses Int?
+  updatedAt     DateTime  @updatedAt
+}
+
+model Link {
+  accessLog      AccessLog?  @relation(name: "AccessLogOnLinks", fields: [accessLogId], references: [id])
+  accessLogId    String?
+  accessLogs     AccessLog[] @relation(name: "AccessLogsOnLink")
+  createdAt      DateTime    @default(now())
+  expirationDate DateTime?
+  id             String      @id @default(cuid())
+  metrics        Metric[]
+  originalUrl    String?
+  shortCode      String?
+  updatedAt      DateTime    @updatedAt
+}
